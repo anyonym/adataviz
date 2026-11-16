@@ -1,1 +1,2 @@
-import {} ./utils.js
+import {*} from "./utils.js"
+import utils from "./utils.js"
