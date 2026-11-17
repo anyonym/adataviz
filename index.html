@@ -3,20 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script type="module" src="main.js"></script>
+    <title>🅿️ Nantes 🏍️</title>
+    <link rel="stylesheet" href="style.css"/>
+    <script type="module" src="main.js" defer></script>
 </head>
 <body>
     <header>
-
+        <h1>🅿️ Stationnement motos & 2 roues motorisés 🏍</h1>
+        <h2>🏙️ Nantes hypercentre 🏛️</h2>
     </header>
     
     <main>
-    
+        <nav id="nav">
+            <button type="button" id="centre">🏰 Centre ville 🏦</button>
+            <button type="button" id="hpsf">🏢 Hauts Pavés - Saint Félix 🏫</button>
+            <button type="button" id="ile">🐘 Île de Nantes 🏗️</button>
+        </nav>
+        <div>
+            <p id="total-results">Nombre de résultats</p>
+        </div>
+        <section id="results">
+            <article class="carte">
+                <h3>Nantes</h3>
+                <ul>
+                    <li id="quartier">Centre ville</li>
+                    <li id="gid">id zone de stationnement</li>
+                    <li id="nbPlaces">X places</li>
+                </ul>
+                <p><b>Coordonnées GPS</b></p>
+                <ul id="gps">
+                    <li id="lat">latitude</li>
+                    <li id="lon">longitude</li>
+                </ul>
+            </article>
+        </section>
+        <section id="focus">
+            <article class="carte cache">
+                <h3>Nantes</h3>
+                <ul>
+                    <li id="quartier">Centre ville</li>
+                    <li id="gid">id zone de stationnement</li>
+                    <li id="nbPlaces">X places</li>
+                </ul>
+                <p><b>Coordonnées GPS</b></p>
+                <ul id="gps">
+                    <li id="lat">latitude</li>
+                    <li id="lon">longitude</li>
+                </ul>
+            </article>
+            <button type="button" id="btn-retour">Retour</button>
+        </section>
+        <nav id="pages">
+            <button type="button" id="btn-precedente">⬅️ Page précédente</button>
+            <button type="button" id="btn-suivante">Page suivante ➡️</button>
+        </nav>
     </main>
 
     <footer>
-        
+        <p>© YE 2026</p>
     </footer>
 </body>
 </html>
