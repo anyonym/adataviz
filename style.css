@@ -1,88 +1,210 @@
+
+/* ========================================
+   1. VARIABLES ET RÉINITIALISATION
+======================================== */
+
 * {
     box-sizing: border-box;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
 }
 
+
+/* ========================================
+   2. STRUCTURE GÉNÉRALE
+======================================== */
+
 body {
+    min-height: 100vh;
     background-color: rgb(2, 138, 249);
-    font-family: arial;
+    font-family: Arial, sans-serif;
 }
 
 /* Header */
+
 header {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+
+    width: 100%;
+    padding: 20px;
+
     background-color: white;
     color: rgb(2, 138, 249);
-    padding: 20px;
 }
 
 /* Main */
+
 main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
+    width: 100%;
+    background-color: rgb(2, 138, 249);
 }
 
-nav {
+
+/* ========================================
+   3. NAVIGATION DES QUARTIERS
+======================================== */
+
+#nav {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding-top: 8px;
+    align-items: center;
+    padding: 10px;
+
+    width: 100%;
+    padding: 10px;
 }
 
 #nav button {
+    width: 100%;
+    max-width: 350px;
     margin: 8px;
     padding: 1rem;
 }
 
-#focus {
+
+/* ========================================
+   4. AFFICHAGE DU NOMBRE DE RÉSULTATS
+======================================== */
+
+#total-results {
+    text-align: center;
+    padding: 10px;
+}
+
+
+/* ========================================
+   5. LISTE DES RÉSULTATS
+======================================== */
+
+.results {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    gap: 12px;
+    padding: 10px;
+}
+
+
+/* ========================================
+   6. CARTES DE RÉSULTATS
+======================================== */
+
+.carte {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-article {
-    border-color: rgb(255, 169, 20);
-}
-
-h3 {
     text-align: center;
+ /* Deux cartes par ligne */
+    flex: 0 0 calc(50% - 6px);
+    min-width: 0;
+    padding: 10px;
+
+    background-color: white;
+    border: 2px solid rgb(255, 169, 20);
+    border-radius: 8px;
+
+    overflow-wrap: anywhere;
+}
+
+/* Espacement des informations dans les cartes */
+
+.carte ul {
+    list-style: none;
+    margin: 8px 0;
+}
+
+.carte p {
+    margin-top: 8px;
+}
+
+
+/* ========================================
+   7. AFFICHAGE DÉTAILLÉ
+======================================== */
+
+.focus {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(2, 138, 249);
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Carte affichée en plein écran */
+
+.focus .carte {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    width: 100%;
+    max-width: 600px;
+    min-height: 300px;
+    padding: 30px 20px;
+
+    background-color: white;
+    border: 3px solid rgb(255, 169, 20);
+    border-radius: 12px;
+
+    overflow-wrap: anywhere;
 }
 
 #btn-retour {
     padding: 1rem;
-    margin-top: 10px;
+    margin-top: 20px;
 }
+
+
+/* ========================================
+   8. PAGINATION
+======================================== */
 
 #pages {
     display: flex;
     flex-direction: row;
-    align-items: space-between;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+    padding: 20px;
 }
 
-#btn-precedente {
-    padding: 1rem;
-    margin-right: 5px;
-}
-
+#btn-precedente,
 #btn-suivante {
     padding: 1rem;
-    margin-left: 5px;
 }
 
-/* Footer */
+
+/* ========================================
+   9. GESTION DE L'AFFICHAGE
+======================================== */
+
+.cache {
+    display: none;
+}
+
+
+/* ========================================
+   10. FOOTER
+======================================== */
+
 footer {
     display: flex;
     justify-content: center;
-    background-color: white;
-    color: rgb(2, 138, 249);
+
+    width: 100%;
     padding: 20px;
     margin-top: 30px;
+
+    background-color: white;
+    color: rgb(2, 138, 249);
 }
