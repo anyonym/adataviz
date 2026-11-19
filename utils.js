@@ -26,7 +26,6 @@ export async function chargerDonnees() {
  * et uniformise les caractères en minuscules.
  */
 export function normalizeText(text) {
-
     return String(text ?? "")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -62,6 +61,28 @@ export function filtrerNbPlaces(donnees, nbPlaces) {
     });
 }
 
+/**
+ * Récupère les coordonnées GPS d'un stationnement.
+ */
+export function getCoordinates(stationnement) {
+
+    const latitude = Number(stationnement.geo_point_2d?.lat);
+    const longitude = Number(stationnement.geo_point_2d?.lon);
+
+    // Vérification des coordonnées
+    if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude) ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180
+    ) {
+        return null;
+    }
+
+    return { latitude, longitude };
+}
 
 /* =====================================================
 	CRÉATION D'UNE CARTE DE RÉSULTAT
@@ -120,11 +141,12 @@ export function formaterDonnees(stationnement, onSelect) {
 				`Voir le détail du stationnement ${stationnement.quartier ?? ""}`
 		);
 
-		// Ouverture de la fiche détaillée
+		// Ouverture de la fiche détaillée au clic
 		article.addEventListener("click", () => {
     		onSelect(stationnement);
 		});
 
+		// Ouverture de la fiche détaillée avec Entrée
 		article.addEventListener("keydown", event => {
     		if (event.key === "Enter" || event.key === " ") {
 		        event.preventDefault();
