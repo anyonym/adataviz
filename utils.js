@@ -111,8 +111,65 @@ export function getCoordinates(stationnement) {
 }
 
 
+
 /* =====================================================
-   6. LIMITATION DES REQUÊTES NOMINATIM
+   6. CRÉATION DES MINI-CARTES OPENSTREETMAP
+===================================================== */
+
+/**
+ * Crée une mini-carte OpenStreetMap à partir
+ * des coordonnées GPS d'un stationnement.
+ */
+export function creerMiniCarte(stationnement, nomClasse = "mini-carte") {
+    // Récupération des coordonnées GPS
+    const coordinates = getCoordinates(stationnement);
+
+    // Vérification des coordonnées
+    if (!coordinates) {
+        return null;
+    }
+    const latitude = coordinates.latitude;
+    const longitude = coordinates.longitude;
+
+    // Définition de la zone affichée sur la carte
+    const ecartLatitude = 0.0015;
+    const ecartLongitude =
+        ecartLatitude *
+        (16 / 9) *
+        Math.cos(latitude * Math.PI / 180);
+
+    // Calcul des limites de la carte
+    const ouest = longitude - ecartLongitude;
+    const est = longitude + ecartLongitude;
+    const sud = latitude - ecartLatitude;
+    const nord = latitude + ecartLatitude;
+
+    // Préparation des paramètres de l'URL
+    const parametres = new URLSearchParams({
+        bbox: `${ouest},${sud},${est},${nord}`,
+        layer: "mapnik",
+        marker: `${latitude},${longitude}`
+    });
+
+    // Création de l'iframe
+    const iframe = document.createElement("iframe");
+    iframe.src =
+        `https://www.openstreetmap.org/export/embed.html?${parametres}`;
+
+    // Personnalisation de l'iframe
+    iframe.classList.add(nomClasse);
+    iframe.title =
+        `Localisation du stationnement dans le quartier ${stationnement.quartier ?? ""}`;
+
+    iframe.loading = "lazy";
+    iframe.setAttribute("allowfullscreen", "");
+    // Retour de la carte HTML
+    return iframe;
+}
+
+
+/* =====================================================
+   7. LIMITATION DES REQUÊTES NOMINATIM
 ===================================================== */
 
 let derniereRequete = 0;
@@ -210,37 +267,51 @@ export async function getAddress(stationnement) {
  * - La commune
  * - Le quartier
  * - Le nombre de places
- *
- * Cette fonction crée uniquement la carte.
- * Les événements sont gérés dans main.js.
+ * - Une mini-carte OpenStreetMap
  */
 export function formaterDonnees(stationnement) {
+
     // Création de la carte principale
     const article = document.createElement("article");
     article.classList.add("carte");
-    // Création du titre : commune
+
+    // Création du titre
     const titre = document.createElement("h3");
     titre.textContent =
         stationnement.commune ?? "Commune inconnue";
+
     // Création de la liste des informations
     const listeInformations = document.createElement("ul");
-    // Création de l'information : quartier
+
+    // Création du quartier
     const quartier = document.createElement("li");
     quartier.classList.add("quartier");
     quartier.textContent =
         stationnement.quartier ?? "Non renseigné";
-    // Création de l'information : nombre de places
+
+    // Création du nombre de places
     const nbPlaces = document.createElement("li");
     nbPlaces.classList.add("nbPlaces");
     nbPlaces.textContent =
         `${stationnement.nombre_place} places`;
+
     // Ajout des informations dans la liste
     listeInformations.append(quartier, nbPlaces);
+
+    // Création de la mini-carte
+    const miniCarte = creerMiniCarte(stationnement);
+
     // Assemblage de la carte
     article.append(
         titre,
         listeInformations
     );
+
+    // Ajout de la mini-carte si les coordonnées existent
+    if (miniCarte) {
+        article.appendChild(miniCarte);
+    }
+
     // Accessibilité de la carte au clavier
     article.tabIndex = 0;
     article.setAttribute("role", "button");
@@ -248,6 +319,6 @@ export function formaterDonnees(stationnement) {
         "aria-label",
         `Voir le détail du stationnement ${stationnement.quartier ?? ""}`
     );
-    // Retourne la carte HTML créée
+    // Retour de la carte HTML
     return article;
 }
