@@ -47,17 +47,7 @@ let currentFilter = null;
 let currentNbPlaces = "";
 
 /* =====================================================
-   4. FONCTIONS UTILITAIRES
-===================================================== */
-
-
-/* =====================================================
-   5. RÉCUPÉRATION DES DONNÉES DE L'API
-===================================================== */
-
-
-/* =====================================================
-   6. FILTRAGE DES STATIONNEMENTS
+   4. FILTRAGE DES STATIONNEMENTS
 ===================================================== */
 
 /**
@@ -105,22 +95,17 @@ function filtrerStationnements() {
 }
 
 /* =====================================================
-   7. CRÉATION D'UNE MINI-CARTE OPENSTREETMAP
+   5. BONUS : CRÉATION D'UNE MINI-CARTE OPENSTREETMAP
 ===================================================== */
 
 
 /* =====================================================
-   8. GÉOCODAGE INVERSE : GPS VERS ADRESSE
+   6. BONUS : GÉOCODAGE INVERSE : GPS VERS ADRESSE
 ===================================================== */
 
 
 /* =====================================================
-   9. CRÉATION D'UNE CARTE DE RÉSULTAT
-===================================================== */
-
-
-/* =====================================================
-   10. AFFICHAGE DE LA FICHE DÉTAILLÉE
+   7. AFFICHAGE DE LA FICHE DÉTAILLÉE
 ===================================================== */
 
 /**
@@ -165,7 +150,7 @@ document.querySelector("#pages").classList.add("cache");
 }
 
 /* =====================================================
-   11. RETOUR À LA LISTE DES RÉSULTATS
+   8. RETOUR À LA LISTE DES RÉSULTATS
 ===================================================== */
 
 function retourListe() {
@@ -179,7 +164,7 @@ function retourListe() {
 }
 
 /* =====================================================
-   12. AFFICHAGE DES RÉSULTATS
+   9. AFFICHAGE DES RÉSULTATS
 ===================================================== */
 
 /**
@@ -227,7 +212,7 @@ function displayResults() {
 }
 
 /* =====================================================
-   13. MISE À JOUR DU COMPTEUR
+   10. MISE À JOUR DU COMPTEUR (AVEC BONUS)
 ===================================================== */
 
 function updateCounter(nombre) {
@@ -236,17 +221,17 @@ function updateCounter(nombre) {
 }
 
 /* =====================================================
-   14. GESTION DE LA PAGINATION
+   11. BONUS : GESTION DE LA PAGINATION
 ===================================================== */
 
 
 /* =====================================================
-   15. NAVIGATION ENTRE LES PAGES
+   12. BONUS : NAVIGATION ENTRE LES PAGES
 ===================================================== */
 
 
 /* =====================================================
-   16. FILTRAGE PAR QUARTIER
+   13. FILTRAGE PAR QUARTIER
 ===================================================== */
 
 filtre.centre.addEventListener("click", () => {
@@ -271,22 +256,19 @@ searchPlacesInput.addEventListener("input", event => {
 });
 
 /* =====================================================
-   17. BOUTON RETOUR
+   14. BOUTON RETOUR
 ===================================================== */
 
 document.querySelector("#btn-retour")
     .addEventListener("click", retourListe);
 
 /* =====================================================
-   18. LANCEMENT DU PROGRAMME
+   15. LANCEMENT DU PROGRAMME
 ===================================================== */
 
 async function initialiserApplication() {
-
     allStationnements = await chargerDonnees();
-
     filteredStationnements = allStationnements;
-
     filtrerStationnements();
 }
 

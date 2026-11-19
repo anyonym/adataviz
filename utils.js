@@ -1,5 +1,5 @@
 /* =====================================================
-	 4. FONCTIONS UTILITAIRES
+	FONCTIONS UTILITAIRES
 ===================================================== */
 
 const url = "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stationnement-deux-roues-motorises-ville-nantes/records?select=gid%2C%20commune%2C%20quartier%2C%20nombre_place%2C%20geo_point_2d&where=%22Centre%20Ville%22%20OR%20%22Ile%20de%20Nantes%22%20OR%20%22Hauts%20Pav%C3%A9s%20Saint%20F%C3%A9lix%22&limit=100"
@@ -64,7 +64,7 @@ export function filtrerNbPlaces(donnees, nbPlaces) {
 
 
 /* =====================================================
-	 9. CRÉATION D'UNE CARTE DE RÉSULTAT
+	CRÉATION D'UNE CARTE DE RÉSULTAT
 ===================================================== */
 
 /**
