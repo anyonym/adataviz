@@ -1,4 +1,4 @@
-import { chargerDonnees, filtrerParQuartier, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js"
+import { chargerDonnees, getCoordinates, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js"
 // import utils from "./utils.js"
 
 
@@ -7,7 +7,7 @@ import { chargerDonnees, filtrerParQuartier, normalizeText, formaterDonnees, fil
 ===================================================== */
 
 // Nombre de cartes affichées par page
-const resultats = 12;
+const resultatsParPage = 12;
 
 /* =====================================================
    2. RÉCUPÉRATION DES ÉLÉMENTS HTML
@@ -114,7 +114,7 @@ function filtrerStationnements() {
  * Cette carte contient également :
  * - Les coordonnées GPS
  * - L'adresse complète
- * - Une mini-carte
+ * - Une mini-carte si bonus fait
  */
 async function displayFocus(stationnement) {
 
@@ -186,9 +186,9 @@ function displayResults() {
     }
 
     // Calcul des positions de début et de fin
-    const startIndex = (currentPage - 1) * resultats;
+    const startIndex = (currentPage - 1) * resultatsParPage;
 
-    const endIndex = startIndex + resultats;
+    const endIndex = startIndex + resultatsParPage;
 
     // Extraction des résultats de la page
     const pageResults = filteredStationnements.slice(
@@ -224,11 +224,50 @@ function updateCounter(nombre) {
    11. BONUS : GESTION DE LA PAGINATION
 ===================================================== */
 
+/**
+ * Calcule le nombre de pages et adapte les boutons.
+ */
+function updatePagination() {
+    const totalPages = Math.ceil(
+        filteredStationnements.length / resultatsParPage
+    );
+    // Affichage du bouton précédent uniquement
+    // à partir de la deuxième page.
+    previousButton.classList.toggle(
+        "cache",
+        currentPage <= 1
+    );
+    // Affichage du bouton suivant uniquement
+    // s'il existe une page supplémentaire.
+    nextButton.classList.toggle(
+        "cache",
+        currentPage >= totalPages
+    );
+}
+
 
 /* =====================================================
    12. BONUS : NAVIGATION ENTRE LES PAGES
 ===================================================== */
 
+// Page précédente
+previousButton.addEventListener("click", () => {
+    if (currentPage > 1) {
+        currentPage--;
+        displayResults();
+    }
+});
+
+// Page suivante
+nextButton.addEventListener("click", () => {
+    const totalPages = Math.ceil(
+        filteredStationnements.length / resultatsParPage
+    );
+    if (currentPage < totalPages) {
+        currentPage++;
+        displayResults();
+    }
+});
 
 /* =====================================================
    13. FILTRAGE PAR QUARTIER
