@@ -236,9 +236,34 @@ main {
     margin-top: 8px;
 }
 
-/* =========================
-   CSS MINI-CARTES
-========================= */
+/* =====================================================
+   MINI-CARTES OPENSTREETMAP
+===================================================== */
+
+/* Mini-carte dans les résultats */
+.mini-carte {
+    display: block;
+    width: 100%;
+    height: 150px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 8px;
+}
+
+/* Conteneur de la carte détaillée */
+.conteneur-mini-carte-focus {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Mini-carte dans la fiche détaillée */
+.mini-carte-focus {
+    display: block;
+    width: 100%;
+    height: 300px;
+    border: none;
+    border-radius: 8px;
+}
 
 /* =========================
    BOUTON RETOUR

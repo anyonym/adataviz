@@ -1,4 +1,4 @@
-import { chargerDonnees, getCoordinates, getAddress, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js";
+import { chargerDonnees, getCoordinates, getAddress, creerMiniCarte, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js";
 
 
 /* =====================================================
@@ -37,6 +37,9 @@ const filtre = {
     hpsf: document.querySelector("#hpsf"),
     ile: document.querySelector("#ile")
 };
+const miniCarteContainer = focusCard.querySelector(
+    ".conteneur-mini-carte-focus"
+);
 
 
 /* =====================================================
@@ -192,6 +195,21 @@ async function displayFocus(stationnement) {
         coordinates?.longitude ?? "Non renseigné";
     // Affichage d'un message pendant la recherche
     adresseElement.textContent = "Recherche de l'adresse...";
+    // Création de la mini-carte
+    const miniCarte = creerMiniCarte(
+        stationnement,
+        "mini-carte-focus"
+    );
+    // Suppression de l'ancienne carte
+    miniCarteContainer.replaceChildren();
+
+    // Affichage de la nouvelle carte
+    if (miniCarte) {
+        miniCarteContainer.appendChild(miniCarte);
+    } else {
+        miniCarteContainer.textContent = "Carte indisponible : coordonnées GPS manquantes.";
+    }
+
     // Affichage de la fiche détaillée
     focusSection.classList.remove("cache");
     focusCard.classList.remove("cache");
