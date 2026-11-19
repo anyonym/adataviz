@@ -290,7 +290,7 @@ function retourListe() {
  */
 function updateCounter(nombre) {
     totalResults.textContent =
-        `${nombre} zones de stationement trouvées`;
+        `${nombre} zones de stationnement trouvées`;
 }
 
 
