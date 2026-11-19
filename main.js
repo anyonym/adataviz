@@ -1,4 +1,4 @@
-import { chargerDonnees, filtrerParQuartier, getCoordinates, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js"
+import { chargerDonnees, getCoordinates, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js"
 // import utils from "./utils.js"
 
 
@@ -114,7 +114,7 @@ function filtrerStationnements() {
  * Cette carte contient également :
  * - Les coordonnées GPS
  * - L'adresse complète
- * - Une mini-carte
+ * - Une mini-carte si bonus fait
  */
 async function displayFocus(stationnement) {
 
