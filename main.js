@@ -1,4 +1,4 @@
-import { chargerDonnees, getCoordinates, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js";
+import { chargerDonnees, getCoordinates, getAddress, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js";
 
 
 /* =====================================================
@@ -53,6 +53,8 @@ let currentPage = 1;
 let currentFilter = null;
 // Nombre de places recherché
 let currentNbPlaces = "";
+// Identifiant de la dernière fiche sélectionnée
+let numeroSelection = 0;
 
 
 /* =====================================================
@@ -159,44 +161,55 @@ function displayResults() {
    6. AFFICHAGE DE LA FICHE DÉTAILLÉE
 ===================================================== */
 
+
 /**
- * Remplit la fiche détaillée avec les informations
- * du stationnement sélectionné.
+ * Affiche les informations détaillées d'un stationnement.
+ * Recherche également son adresse à partir des coordonnées GPS.
  */
-function displayFocus(stationnement) {
+async function displayFocus(stationnement) {
+    // Identification de la sélection actuelle
+    numeroSelection++;
+    const selectionActuelle = numeroSelection;
     // Récupération des éléments HTML
     const titre = focusCard.querySelector("h3");
     const quartier = focusCard.querySelector(".quartier");
     const nbPlaces = focusCard.querySelector(".nbPlaces");
     const latitudeElement = focusCard.querySelector(".lat");
     const longitudeElement = focusCard.querySelector(".lon");
-    
-    // Mise à jour du titre
+    const adresseElement = focusCard.querySelector(".adresse");
+    // Mise à jour des informations du stationnement
     titre.textContent =
         stationnement.commune ?? "Commune inconnue";
-    // Mise à jour du quartier
     quartier.textContent =
         stationnement.quartier ?? "Non renseigné";
-    // Mise à jour du nombre de places
     nbPlaces.textContent =
         `${stationnement.nombre_place} places`;
     // Récupération des coordonnées GPS
     const coordinates = getCoordinates(stationnement);
-    // Affichage de la latitude
     latitudeElement.textContent =
         coordinates?.latitude ?? "Non renseigné";
-    // Affichage de la longitude
     longitudeElement.textContent =
         coordinates?.longitude ?? "Non renseigné";
+    // Affichage d'un message pendant la recherche
+    adresseElement.textContent = "Recherche de l'adresse...";
     // Affichage de la fiche détaillée
     focusSection.classList.remove("cache");
     focusCard.classList.remove("cache");
-    // Masquage de la navigation et des résultats
+    // Masquage de la liste des résultats
     nav.classList.add("cache");
     totalResults.parentElement.classList.add("cache");
     resultsContainer.classList.add("cache");
     pages.classList.add("cache");
+    // Recherche de l'adresse avec Nominatim
+    const adresse = await getAddress(stationnement);
+    // Vérification que la fiche sélectionnée est toujours la même
+    if (selectionActuelle !== numeroSelection) {
+        return;
+    }
+    // Affichage de l'adresse
+    adresseElement.textContent = adresse;
 }
+
 
 
 /* =====================================================
@@ -207,6 +220,10 @@ function displayFocus(stationnement) {
  * Masque la fiche détaillée et réaffiche les résultats.
  */
 function retourListe() {
+    // Annulation logique d'une ancienne recherche d'adresse 
+    // La requête Nominatim peut encore être en cours. 
+    // L'incrémentation de numeroSelection permet d'empêcher son résultat de modifier une fiche qui n'est plus sélectionnée.
+    numeroSelection++;
     // Masquage de la fiche détaillée
     focusSection.classList.add("cache");
     focusCard.classList.add("cache");
