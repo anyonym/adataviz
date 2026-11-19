@@ -112,7 +112,95 @@ export function getCoordinates(stationnement) {
 
 
 /* =====================================================
-   6. CRÉATION DES CARTES DE RÉSULTATS
+   6. LIMITATION DES REQUÊTES NOMINATIM
+===================================================== */
+
+let derniereRequete = 0;
+let fileRequetes = Promise.resolve();
+
+/**
+ * Attend que la requête précédente soit terminée
+ * et respecte un intervalle d'une seconde.
+ */
+function attendreLimiteNominatim() {
+    const requete = fileRequetes.then(async function() {
+        const maintenant = Date.now();
+        const delai = 1000 - (maintenant - derniereRequete);
+        if (delai > 0) {
+            await new Promise(function(resolve) {
+                setTimeout(resolve, delai);
+            });
+        }
+        derniereRequete = Date.now();
+    });
+    fileRequetes = requete.catch(function() {});
+    return requete;
+}
+
+
+/* =====================================================
+   7. GÉOCODAGE INVERSE : GPS VERS ADRESSE
+===================================================== */
+
+// Stockage des adresses déjà récupérées
+const adressesEnCache = new Map();
+
+/**
+ * Recherche une adresse à partir des coordonnées GPS.
+ */
+export async function getAddress(stationnement) {
+    // Récupération des coordonnées GPS
+    const coordinates = getCoordinates(stationnement);
+    // Vérification des coordonnées
+    if (!coordinates) {
+        return "Coordonnées GPS indisponibles";
+    }
+    const latitude = coordinates.latitude;
+    const longitude = coordinates.longitude;
+    // Création d'une clé pour retrouver une adresse en cache
+    const cle = `${latitude},${longitude}`;
+    // Vérification si l'adresse existe déjà
+    if (adressesEnCache.has(cle)) {
+        return adressesEnCache.get(cle);
+    }
+    try {
+
+        // Préparation des paramètres de recherche
+        const parametres = new URLSearchParams({
+            lat: latitude,
+            lon: longitude,
+            format: "jsonv2",
+            addressdetails: "1",
+            zoom: "18",
+            "accept-language": "fr"
+        });
+        
+        await attendreLimiteNominatim();
+        
+        // Construction de l'URL
+        const url = `https://nominatim.openstreetmap.org/reverse?${parametres}`;
+        // Envoi de la requête à Nominatim
+        const reponse = await fetch(url);
+        // Vérification de la réponse
+        if (!reponse.ok) {
+            throw new Error("Erreur lors de la recherche de l'adresse");
+        }
+        // Conversion de la réponse en objet JavaScript
+        const donnees = await reponse.json();
+        // Récupération de l'adresse complète
+        const adresse = donnees.display_name ?? "Adresse introuvable";
+        // Enregistrement de l'adresse dans le cache
+        adressesEnCache.set(cle, adresse);
+        return adresse;
+    } catch (err) {
+        console.error("Erreur de géocodage :", err.message);
+        return "Adresse indisponible";
+    }
+}
+
+
+/* =====================================================
+   8. CRÉATION DES CARTES DE RÉSULTATS
 ===================================================== */
 
 /**
