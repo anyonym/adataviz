@@ -10,41 +10,42 @@
 <body>
     <header>
         <h1>🅿️ Stationnement motos & 2 roues motorisés 🏍</h1>
-        <h2>🏙️ Nantes hypercentre 🏛️</h2>
+        <h2>NANTES HYPERCENTRE</h2>
     </header>
     
     <main>
         <nav id="nav">
-            <button type="button" id="centre">🏰 Centre ville 🏦</button>
-            <button type="button" id="hpsf">🏢 Hauts Pavés - Saint Félix 🏫</button>
-            <button type="button" id="ile">🐘 Île de Nantes 🏗️</button>
+            <button type="button" id="centre">🏰 Centre ville</button>
+            <button type="button" id="hpsf">🏢 Hauts Pavés - Saint Félix</button>
+            <button type="button" id="ile">🐘 Île de Nantes</button>
         </nav>
-        <div id="total-results">
-            <p>Nombre de résultats</p>
+        <div>
+            <p id="total-results">Nombre de résultats : 0</p>
+        </div>
+        <div class="recherche-places">
+            <label for="recherche-places">
+                Rechercher par nombre de places
+            </label>
+            <input
+            type="search"
+            id="recherche-places"
+            placeholder="Ex. : 12"
+            autocomplete="off"
+        >
         </div>
         <section class="results">
-            <article class="carte">
-                <h3>Nantes</h3>
-                <ul>
-                    <li class="quartier">Centre ville</li>
-                    <li class="gid">id zone de stationnement</li>
-                    <li class="nbPlaces">X places</li>
-                </ul>
-                <p><b>Coordonnées GPS</b></p>
-                <ul class="gps">
-                    <li class="lat">latitude</li>
-                    <li class="lon">longitude</li>
-                </ul>
-            </article>
+            <!-- les cartes seront générées par javascript -->
         </section>
         <section class="focus cache">
             <article class="carte cache">
+                <!-- Mini-carte géographique -->
+                <div id="mini-map"></div>
                 <h3>Nantes</h3>
                 <ul>
                     <li class="quartier">Centre ville</li>
-                    <li class="gid">id zone de stationnement</li>
                     <li class="nbPlaces">X places</li>
-                </ul>
+                    </ul>
+
                 <p><b>Coordonnées GPS</b></p>
                 <ul class="gps">
                     <li class="lat">latitude</li>
@@ -53,6 +54,7 @@
             </article>
             <button type="button" id="btn-retour">Retour</button>
         </section>
+
         <nav id="pages">
             <button type="button" id="btn-precedente">⬅️ Précédente</button>
             <button type="button" id="btn-suivante">Suivante ➡️</button>
