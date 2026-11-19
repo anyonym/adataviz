@@ -252,6 +252,24 @@ main {
    PAGINATION
 ========================= */
 
+#pages {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    padding: 20px;
+}
+
+#pages button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 /* =========================
    CLASSE POUR MASQUER
 ========================= */
