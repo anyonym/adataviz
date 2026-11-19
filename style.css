@@ -1,7 +1,6 @@
-
-/* ========================================
-   1. VARIABLES ET RÉINITIALISATION
-======================================== */
+/* =========================
+   RÉINITIALISATION
+========================= */
 
 * {
     box-sizing: border-box;
@@ -9,10 +8,9 @@
     padding: 0;
 }
 
-
-/* ========================================
-   2. STRUCTURE GÉNÉRALE
-======================================== */
+/* =========================
+   PAGE
+========================= */
 
 body {
     min-height: 100vh;
@@ -20,98 +18,171 @@ body {
     font-family: Arial, sans-serif;
 }
 
-/* Header */
-
 header {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-
     width: 100%;
     padding: 20px;
-
     background-color: white;
     color: rgb(2, 138, 249);
 }
 
-/* Main */
+h1 + h2 {
+  margin-top: 1.5rem;
+}
 
 main {
     width: 100%;
     background-color: rgb(2, 138, 249);
 }
 
-
-/* ========================================
-   3. NAVIGATION DES QUARTIERS
-======================================== */
+/* =========================
+   BOUTONS DE NAVIGATION
+========================= */
 
 #nav {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px;
-
     width: 100%;
     padding: 10px;
+}
+
+#nav button,
+#pages button,
+#btn-retour {
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    color: rgb(2, 138, 249);
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease,
+        color 0.2s ease;
 }
 
 #nav button {
     width: 100%;
-    max-width: 350px;
+    max-width: 275px;
     margin: 8px;
-    padding: 1rem;
 }
 
+/* Animation au survol */
 
-/* ========================================
-   4. AFFICHAGE DU NOMBRE DE RÉSULTATS
-======================================== */
+#nav button:not(:disabled):hover,
+#pages button:not(:disabled):hover,
+#btn-retour:not(:disabled):hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 12px rgba(0, 0, 0, 0.3);
+    background-color: rgb(255, 169, 20);
+    color: white;
+}
+
+/* Animation au clic */
+
+#nav button:not(:disabled):active,
+#pages button:not(:disabled):active,
+#btn-retour:not(:disabled):active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Réinitialisation après le clic */
+
+#pages button:not(:hover):focus {
+    background-color: white;
+    color: rgb(2, 138, 249);
+}
+
+/* Accessibilité : navigation au clavier */
+
+#nav button:focus-visible,
+#pages button:focus-visible,
+#btn-retour:focus-visible {
+    outline: 3px solid rgb(255, 169, 20);
+    outline-offset: 3px;
+}
+
+/* =========================
+   NOMBRE DE RÉSULTATS
+========================= */
 
 #total-results {
     text-align: center;
     padding: 10px;
 }
 
+/* =========================
+   RECHERCHE PAR NOMBRE DE PLACES
+========================= */
 
-/* ========================================
-   5. LISTE DES RÉSULTATS
-======================================== */
+.recherche-places {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+}
+
+.recherche-places label {
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+.recherche-places input {
+    width: 100%;
+    max-width: 300px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.recherche-places input:focus-visible {
+    outline: 3px solid rgb(255, 169, 20);
+    outline-offset: 3px;
+}
+
+/* =========================
+   CARTES DES RÉSULTATS
+========================= */
 
 .results {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
-
     gap: 12px;
     padding: 10px;
 }
-
-
-/* ========================================
-   6. CARTES DE RÉSULTATS
-======================================== */
 
 .carte {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
- /* Deux cartes par ligne */
     flex: 0 0 calc(50% - 6px);
     min-width: 0;
     padding: 10px;
-
     background-color: white;
     border: 2px solid rgb(255, 169, 20);
     border-radius: 8px;
-
     overflow-wrap: anywhere;
 }
 
-/* Espacement des informations dans les cartes */
+.results .carte {
+    cursor: pointer;
+}
 
 .carte ul {
     list-style: none;
@@ -122,89 +193,131 @@ main {
     margin-top: 8px;
 }
 
-
-/* ========================================
-   7. AFFICHAGE DÉTAILLÉ
-======================================== */
+/* =========================
+   CARTE DÉTAILLÉE
+========================= */
 
 .focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    background-color: rgb(2, 138, 249);
+    justify-content: flex-start;
     width: 100%;
     min-height: 100vh;
-    padding: 20px;
+    padding: 15px;
+    background-color: rgb(2, 138, 249);
 }
-
-/* Carte affichée en plein écran */
 
 .focus .carte {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-
+    flex: none;
     width: 100%;
     max-width: 600px;
-    min-height: 300px;
-    padding: 30px 20px;
-
+    min-height: 0;
+    padding: 15px;
     background-color: white;
     border: 3px solid rgb(255, 169, 20);
     border-radius: 12px;
-
     overflow-wrap: anywhere;
 }
 
+.focus .carte h3 {
+    margin: 0 0 8px;
+}
+
+.focus .carte ul {
+    margin: 5px 0;
+}
+
+.focus .carte p {
+    margin-top: 8px;
+}
+
+/* =========================
+   CSS MINI-CARTES
+========================= */
+
+/* =========================
+   BOUTON RETOUR
+========================= */
+
 #btn-retour {
-    padding: 1rem;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
+/* =========================
+   PAGINATION
+========================= */
 
-/* ========================================
-   8. PAGINATION
-======================================== */
+/* =========================
+   CLASSE POUR MASQUER
+========================= */
 
-#pages {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-
-    width: 100%;
-    padding: 20px;
-}
-
-#btn-precedente,
-#btn-suivante {
-    padding: 1rem;
-}
-
-
-/* ========================================
-   9. GESTION DE L'AFFICHAGE
-======================================== */
-
-.cache {
+.cache,
+#nav.cache,
+#pages.cache {
     display: none;
 }
 
-
-/* ========================================
-   10. FOOTER
-======================================== */
+/* =========================
+   PIED DE PAGE
+========================= */
 
 footer {
     display: flex;
     justify-content: center;
-
     width: 100%;
     padding: 20px;
     margin-top: 30px;
-
     background-color: white;
     color: rgb(2, 138, 249);
+}
+
+/* =========================
+   RESPONSIVE 768px et +
+========================= */
+
+@media (min-width: 768px) {
+
+    /* Boutons de filtre alignés */
+
+    #nav {
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    #nav button {
+        flex: 1;
+        max-width: 300px;
+        margin: 0;
+    }
+
+    /* Trois cartes par ligne */
+
+    .results {
+        justify-content: flex-start;
+        gap: 15px;
+    }
+
+    .results .carte {
+        flex: 0 0 calc((100% - 30px) / 3);
+    }
+}
+
+/* =========================
+   RESPONSIVE 1024px et +
+========================= */
+
+@media (min-width: 1024px) {
+
+    /* Quatre cartes par ligne */
+
+    .results .carte {
+        flex: 0 0 calc((100% - 45px) / 4);
+    }
 }
