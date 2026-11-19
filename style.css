@@ -288,6 +288,10 @@ main {
     padding: 20px;
 }
 
+#pages button {
+    width: 150px;
+}
+
 #pages button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
