@@ -1,5 +1,4 @@
-import { chargerDonnees, getCoordinates, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js"
-// import utils from "./utils.js"
+import { chargerDonnees, getCoordinates, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js";
 
 
 /* =====================================================
@@ -9,62 +8,72 @@ import { chargerDonnees, getCoordinates, normalizeText, formaterDonnees, filtrer
 // Nombre de cartes affichées par page
 const resultatsParPage = 12;
 
+
 /* =====================================================
    2. RÉCUPÉRATION DES ÉLÉMENTS HTML
 ===================================================== */
 
+// Zone contenant les cartes
 const resultsContainer = document.querySelector(".results");
+// Compteur de résultats
 const totalResults = document.querySelector("#total-results p");
+// Champ de recherche
 const searchPlacesInput = document.querySelector("#recherche-places");
+// Section de la fiche détaillée
 const focusSection = document.querySelector(".focus");
+// Carte de la fiche détaillée
 const focusCard = document.querySelector(".focus .carte");
+// Navigation
+const nav = document.querySelector("#nav");
+const pages = document.querySelector("#pages");
+// Boutons de pagination
 const previousButton = document.querySelector("#btn-precedente");
 const nextButton = document.querySelector("#btn-suivante");
+// Bouton de retour
+const returnButton = document.querySelector("#btn-retour");
+// Boutons de filtrage par quartier
 const filtre = {
     centre: document.querySelector("#centre"),
     hpsf: document.querySelector("#hpsf"),
     ile: document.querySelector("#ile")
 };
 
+
 /* =====================================================
    3. VARIABLES DU PROGRAMME
 ===================================================== */
 
-// Ensemble des données récupérées depuis l'API
+// Toutes les données récupérées depuis l'API
 let allStationnements = [];
-
 // Résultats après filtrage
 let filteredStationnements = [];
-
 // Page actuellement affichée
 let currentPage = 1;
-
 // Quartier actuellement sélectionné
-// null signifie que tous les quartiers sont affichés
 let currentFilter = null;
-
 // Nombre de places recherché
 let currentNbPlaces = "";
+
 
 /* =====================================================
    4. FILTRAGE DES STATIONNEMENTS
 ===================================================== */
 
 /**
- * Exclut les zones sans place disponible,
- * applique le filtre de quartier et le filtre
- * sur le nombre de places.
+ * Filtre les stationnements :
+ * - Exclut les zones sans place disponible.
+ * - Applique le filtre de quartier.
+ * - Applique le filtre sur le nombre de places.
  */
 function filtrerStationnements() {
-
     // Filtrage des données par quartier
     const stationnementsFiltres = allStationnements.filter(stationnement => {
         const nombrePlaces = Number(stationnement.nombre_place);
-        // Exclusion des zones à zéro place
+        // Exclusion des zones sans place disponible
         if (!Number.isFinite(nombrePlaces) || nombrePlaces <= 0) {
             return false;
         }
-        // Aucun filtre de quartier
+        // Aucun filtre de quartier sélectionné
         if (currentFilter === null) {
             return true;
         }
@@ -89,156 +98,157 @@ function filtrerStationnements() {
         stationnementsFiltres,
         currentNbPlaces
     );
-    // Retour à la première page après un filtrage
+    // Retour à la première page
     currentPage = 1;
     displayResults();
 }
 
-/* =====================================================
-   5. BONUS : CRÉATION D'UNE MINI-CARTE OPENSTREETMAP
-===================================================== */
-
 
 /* =====================================================
-   6. BONUS : GÉOCODAGE INVERSE : GPS VERS ADRESSE
-===================================================== */
-
-
-/* =====================================================
-   7. AFFICHAGE DE LA FICHE DÉTAILLÉE
+   5. AFFICHAGE DES RÉSULTATS
 ===================================================== */
 
 /**
- * Remplit la carte présente dans la section .focus.
- *
- * Cette carte contient également :
- * - Les coordonnées GPS
- * - L'adresse complète
- * - Une mini-carte si bonus fait
+ * Affiche les stationnements de la page actuelle.
  */
-async function displayFocus(stationnement) {
+function displayResults() {
+    // Suppression des anciennes cartes
+    resultsContainer.replaceChildren();
+    // Vérification de l'absence de résultats
+    if (filteredStationnements.length === 0) {
+        resultsContainer.textContent = "Aucune zone de stationnement ne correspond.";
+        updateCounter(0);
+        updatePagination();
+        return;
+    }
+    // Calcul de la position du premier résultat
+    const startIndex = (currentPage - 1) * resultatsParPage;
+    // Calcul de la position du dernier résultat
+    const endIndex = startIndex + resultatsParPage;
+    // Récupération des résultats de la page actuelle
+    const pageResults = filteredStationnements.slice(
+        startIndex,
+        endIndex
+    );
+    // Création et affichage des cartes
+    pageResults.forEach(stationnement => {
+        // Création de la carte HTML
+        const carte = formaterDonnees(stationnement);
+        // Ouverture de la fiche détaillée au clic
+        carte.addEventListener("click", function() {
+            displayFocus(stationnement);
+        });
+        // Ouverture de la fiche détaillée au clavier
+        carte.addEventListener("keydown", function(event) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                displayFocus(stationnement);
+            }
+        });
+        // Ajout de la carte dans la page
+        resultsContainer.appendChild(carte);
+    });
+    // Mise à jour du compteur
+    updateCounter(filteredStationnements.length);
+    // Mise à jour de la pagination
+    updatePagination();
+}
 
-    // Récupération des éléments HTML existants
+
+/* =====================================================
+   6. AFFICHAGE DE LA FICHE DÉTAILLÉE
+===================================================== */
+
+/**
+ * Remplit la fiche détaillée avec les informations
+ * du stationnement sélectionné.
+ */
+function displayFocus(stationnement) {
+    // Récupération des éléments HTML
     const titre = focusCard.querySelector("h3");
     const quartier = focusCard.querySelector(".quartier");
     const nbPlaces = focusCard.querySelector(".nbPlaces");
     const latitudeElement = focusCard.querySelector(".lat");
     const longitudeElement = focusCard.querySelector(".lon");
-
-    // Mise à jour des informations
+    
+    // Mise à jour du titre
     titre.textContent =
         stationnement.commune ?? "Commune inconnue";
+    // Mise à jour du quartier
     quartier.textContent =
         stationnement.quartier ?? "Non renseigné";
+    // Mise à jour du nombre de places
     nbPlaces.textContent =
         `${stationnement.nombre_place} places`;
+    // Récupération des coordonnées GPS
     const coordinates = getCoordinates(stationnement);
+    // Affichage de la latitude
     latitudeElement.textContent =
         coordinates?.latitude ?? "Non renseigné";
+    // Affichage de la longitude
     longitudeElement.textContent =
         coordinates?.longitude ?? "Non renseigné";
-
-    // Affichage de la fiche
+    // Affichage de la fiche détaillée
     focusSection.classList.remove("cache");
     focusCard.classList.remove("cache");
-
     // Masquage de la navigation et des résultats
-document.querySelector("#nav").classList.add("cache");
-document.querySelector("#total-results").classList.add("cache");
-resultsContainer.classList.add("cache");
-document.querySelector("#pages").classList.add("cache");
+    nav.classList.add("cache");
+    totalResults.parentElement.classList.add("cache");
+    resultsContainer.classList.add("cache");
+    pages.classList.add("cache");
 }
 
-/* =====================================================
-   8. RETOUR À LA LISTE DES RÉSULTATS
-===================================================== */
-
-function retourListe() {
-    focusSection.classList.add("cache");
-    focusCard.classList.add("cache");
-    // Réaffichage de la navigation et des résultats
-    document.querySelector("#nav").classList.remove("cache");
-    document.querySelector("#total-results").classList.remove("cache");
-    resultsContainer.classList.remove("cache");
-    document.querySelector("#pages").classList.remove("cache");
-}
 
 /* =====================================================
-   9. AFFICHAGE DES RÉSULTATS
+   7. RETOUR À LA LISTE DES RÉSULTATS
 ===================================================== */
 
 /**
- * Affiche les résultats de la page actuelle.
- * Affiche un message si aucun résultat ne correspond.
+ * Masque la fiche détaillée et réaffiche les résultats.
  */
-function displayResults() {
-
-    // Suppression des anciennes cartes
-    resultsContainer.replaceChildren();
-
-    // Vérification de l'absence de résultats
-    if (filteredStationnements.length === 0) {
-        resultsContainer.textContent =
-            "Aucune zone de stationnement ne correspond.";
-        updateCounter(0);
-        updatePagination();
-        return;
-    }
-
-    // Calcul des positions de début et de fin
-    const startIndex = (currentPage - 1) * resultatsParPage;
-
-    const endIndex = startIndex + resultatsParPage;
-
-    // Extraction des résultats de la page
-    const pageResults = filteredStationnements.slice(
-        startIndex,
-        endIndex
-    );
-
-    // Création des cartes
-    pageResults.forEach(stationnement => {
-
-        const carte = formaterDonnees(stationnement, displayFocus);
-
-        resultsContainer.appendChild(carte);
-    });
-
-    // Mise à jour du compteur
-    updateCounter(filteredStationnements.length);
-
-    // Mise à jour de la pagination
-    updatePagination();
+function retourListe() {
+    // Masquage de la fiche détaillée
+    focusSection.classList.add("cache");
+    focusCard.classList.add("cache");
+    // Réaffichage de la navigation
+    nav.classList.remove("cache");
+    totalResults.parentElement.classList.remove("cache");
+    resultsContainer.classList.remove("cache");
+    pages.classList.remove("cache");
 }
 
+
 /* =====================================================
-   10. MISE À JOUR DU COMPTEUR (AVEC BONUS)
+   8. MISE À JOUR DU COMPTEUR
 ===================================================== */
 
+/**
+ * Affiche le nombre total de résultats.
+ */
 function updateCounter(nombre) {
     totalResults.textContent =
         `Nombre de résultats : ${nombre}`;
 }
 
+
 /* =====================================================
-   11. BONUS : GESTION DE LA PAGINATION
+   9. GESTION DE LA PAGINATION
 ===================================================== */
 
 /**
- * Calcule le nombre de pages et adapte les boutons.
+ * Calcule le nombre de pages disponibles.
+ * Affiche ou masque les boutons de navigation.
  */
 function updatePagination() {
     const totalPages = Math.ceil(
         filteredStationnements.length / resultatsParPage
     );
-    // Affichage du bouton précédent uniquement
-    // à partir de la deuxième page.
+    // Bouton précédent
     previousButton.classList.toggle(
         "cache",
         currentPage <= 1
     );
-    // Affichage du bouton suivant uniquement
-    // s'il existe une page supplémentaire.
+    // Bouton suivant
     nextButton.classList.toggle(
         "cache",
         currentPage >= totalPages
@@ -247,11 +257,13 @@ function updatePagination() {
 
 
 /* =====================================================
-   12. BONUS : NAVIGATION ENTRE LES PAGES
+   10. GESTION DES ÉVÉNEMENTS
 ===================================================== */
 
+/* ---------- Pagination ---------- */
+
 // Page précédente
-previousButton.addEventListener("click", () => {
+previousButton.addEventListener("click", function() {
     if (currentPage > 1) {
         currentPage--;
         displayResults();
@@ -259,7 +271,7 @@ previousButton.addEventListener("click", () => {
 });
 
 // Page suivante
-nextButton.addEventListener("click", () => {
+nextButton.addEventListener("click", function() {
     const totalPages = Math.ceil(
         filteredStationnements.length / resultatsParPage
     );
@@ -269,46 +281,50 @@ nextButton.addEventListener("click", () => {
     }
 });
 
-/* =====================================================
-   13. FILTRAGE PAR QUARTIER
-===================================================== */
+/* ---------- Filtrage par quartier ---------- */
 
-filtre.centre.addEventListener("click", () => {
+// Centre-ville
+filtre.centre.addEventListener("click", function() {
     currentFilter = "centre";
     filtrerStationnements();
 });
 
-filtre.hpsf.addEventListener("click", () => {
+// Hauts-Pavés - Saint-Félix
+filtre.hpsf.addEventListener("click", function() {
     currentFilter = "hpsf";
     filtrerStationnements();
 });
 
-filtre.ile.addEventListener("click", () => {
+// Île de Nantes
+filtre.ile.addEventListener("click", function() {
     currentFilter = "ile";
     filtrerStationnements();
 });
 
-// Recherche dynamique par nombre de places
-searchPlacesInput.addEventListener("input", event => {
+/* ---------- Recherche par nombre de places ---------- */
+
+searchPlacesInput.addEventListener("input", function(event) {
     currentNbPlaces = event.target.value.trim();
     filtrerStationnements();
 });
 
-/* =====================================================
-   14. BOUTON RETOUR
-===================================================== */
+/* ---------- Bouton retour ---------- */
 
-document.querySelector("#btn-retour")
-    .addEventListener("click", retourListe);
+returnButton.addEventListener("click", retourListe);
+
 
 /* =====================================================
-   15. LANCEMENT DU PROGRAMME
+   11. INITIALISATION DE L'APPLICATION
 ===================================================== */
 
+/**
+ * Charge les données et lance l'affichage.
+ */
 async function initialiserApplication() {
+    // Récupération des données depuis l'API
     allStationnements = await chargerDonnees();
-    filteredStationnements = allStationnements;
+    // Application des filtres et affichage
     filtrerStationnements();
 }
-
+// Lancement de l'application
 initialiserApplication();
