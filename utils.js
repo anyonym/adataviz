@@ -1,39 +1,5 @@
 /* =====================================================
-   1. CONFIGURATION DE L'API
-===================================================== */
-
-const url = "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stationnement-deux-roues-motorises-ville-nantes/records?select=gid%2C%20commune%2C%20quartier%2C%20nombre_place%2C%20geo_point_2d&where=%22Centre%20Ville%22%20OR%20%22Ile%20de%20Nantes%22%20OR%20%22Hauts%20Pav%C3%A9s%20Saint%20F%C3%A9lix%22&limit=100";
-
-
-/* =====================================================
-   2. RÉCUPÉRATION DES DONNÉES
-===================================================== */
-
-/**
- * Récupère les données depuis l'API.
- * Transforme la réponse en objet JavaScript.
- */
-export async function chargerDonnees() {
-    try {
-        const reponse = await fetch(url);
-        // Vérification de la réponse de l'API
-        if (!reponse.ok) {
-            throw new Error("Erreur HTTP " + reponse.status);
-        }
-        const donnees = await reponse.json();
-        console.log(
-            donnees.total_count + " enregistrements au total"
-        );
-        return donnees.results ?? [];
-    } catch (err) {
-        console.error("Erreur de chargement :", err.message);
-        return [];
-    }
-}
-
-
-/* =====================================================
-   3. NORMALISATION DES TEXTES
+   1. NORMALISATION DES TEXTES
 ===================================================== */
 
 /**
@@ -58,7 +24,7 @@ export function filtrerParQuartier(text) {
 
 
 /* =====================================================
-   4. FILTRAGE PAR NOMBRE DE PLACES
+   2. FILTRAGE PAR NOMBRE DE PLACES
 ===================================================== */
 
 /**
@@ -84,7 +50,7 @@ export function filtrerNbPlaces(donnees, nbPlaces) {
 
 
 /* =====================================================
-   5. RÉCUPÉRATION DES COORDONNÉES GPS
+   3. RÉCUPÉRATION DES COORDONNÉES GPS
 ===================================================== */
 
 /**
@@ -111,9 +77,8 @@ export function getCoordinates(stationnement) {
 }
 
 
-
 /* =====================================================
-   6. CRÉATION DES MINI-CARTES OPENSTREETMAP
+   4. CRÉATION DES MINI-CARTES OPENSTREETMAP
 ===================================================== */
 
 /**
@@ -169,7 +134,7 @@ export function creerMiniCarte(stationnement, nomClasse = "mini-carte") {
 
 
 /* =====================================================
-   7. LIMITATION DES REQUÊTES NOMINATIM
+   5. LIMITATION DES REQUÊTES NOMINATIM
 ===================================================== */
 
 let derniereRequete = 0;
@@ -196,7 +161,7 @@ function attendreLimiteNominatim() {
 
 
 /* =====================================================
-   7. GÉOCODAGE INVERSE : GPS VERS ADRESSE
+   6. GÉOCODAGE INVERSE : GPS VERS ADRESSE
 ===================================================== */
 
 // Stockage des adresses déjà récupérées
@@ -257,7 +222,7 @@ export async function getAddress(stationnement) {
 
 
 /* =====================================================
-   8. CRÉATION DES CARTES DE RÉSULTATS
+   7. CRÉATION DES CARTES DE RÉSULTATS
 ===================================================== */
 
 /**

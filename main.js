@@ -1,16 +1,45 @@
-import { chargerDonnees, getCoordinates, getAddress, creerMiniCarte, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js";
+import { creerMiniCarte, getAddress, getCoordinates, normalizeText, formaterDonnees, filtrerNbPlaces } from "./utils.js";
 
 
 /* =====================================================
-   1. CONFIGURATION GÉNÉRALE
+   1. CONFIGURATION DE L'API
 ===================================================== */
+
+const url = "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stationnement-deux-roues-motorises-ville-nantes/records?select=gid%2C%20commune%2C%20quartier%2C%20nombre_place%2C%20geo_point_2d&where=%22Centre%20Ville%22%20OR%20%22Ile%20de%20Nantes%22%20OR%20%22Hauts%20Pav%C3%A9s%20Saint%20F%C3%A9lix%22&limit=100";
+
+
+/* =====================================================
+   2. RÉCUPÉRATION DES DONNÉES
+===================================================== */
+
+/**
+ * Récupère les données depuis l'API.
+ * Transforme la réponse en objet JavaScript.
+ */
+async function chargerDonnees() {
+    try {
+        const reponse = await fetch(url);
+        // Vérification de la réponse de l'API
+        if (!reponse.ok) {
+            throw new Error("Erreur HTTP " + reponse.status);
+        }
+        const donnees = await reponse.json();
+        console.log(
+            donnees.total_count + " enregistrements au total"
+        );
+        return donnees.results ?? [];
+    } catch (err) {
+        console.error("Erreur de chargement :", err.message);
+        return [];
+    }
+}
 
 // Nombre de cartes affichées par page
 const resultatsParPage = 12;
 
 
 /* =====================================================
-   2. RÉCUPÉRATION DES ÉLÉMENTS HTML
+   3. RÉCUPÉRATION DES ÉLÉMENTS HTML
 ===================================================== */
 
 // Zone contenant les cartes
@@ -43,7 +72,7 @@ const miniCarteContainer = focusCard.querySelector(
 
 
 /* =====================================================
-   3. VARIABLES DU PROGRAMME
+   4. VARIABLES DU PROGRAMME
 ===================================================== */
 
 // Toutes les données récupérées depuis l'API
@@ -61,7 +90,7 @@ let numeroSelection = 0;
 
 
 /* =====================================================
-   4. FILTRAGE DES STATIONNEMENTS
+   5. FILTRAGE DES STATIONNEMENTS
 ===================================================== */
 
 /**
@@ -110,7 +139,7 @@ function filtrerStationnements() {
 
 
 /* =====================================================
-   5. AFFICHAGE DES RÉSULTATS
+   6. AFFICHAGE DES RÉSULTATS
 ===================================================== */
 
 /**
@@ -161,7 +190,7 @@ function displayResults() {
 
 
 /* =====================================================
-   6. AFFICHAGE DE LA FICHE DÉTAILLÉE
+   7. AFFICHAGE DE LA FICHE DÉTAILLÉE
 ===================================================== */
 
 
@@ -229,9 +258,8 @@ async function displayFocus(stationnement) {
 }
 
 
-
 /* =====================================================
-   7. RETOUR À LA LISTE DES RÉSULTATS
+   8. RETOUR À LA LISTE DES RÉSULTATS
 ===================================================== */
 
 /**
@@ -254,7 +282,7 @@ function retourListe() {
 
 
 /* =====================================================
-   8. MISE À JOUR DU COMPTEUR
+   9. MISE À JOUR DU COMPTEUR
 ===================================================== */
 
 /**
@@ -267,7 +295,7 @@ function updateCounter(nombre) {
 
 
 /* =====================================================
-   9. GESTION DE LA PAGINATION
+   10. GESTION DE LA PAGINATION
 ===================================================== */
 
 /**
@@ -292,7 +320,7 @@ function updatePagination() {
 
 
 /* =====================================================
-   10. GESTION DES ÉVÉNEMENTS
+   11. GESTION DES ÉVÉNEMENTS
 ===================================================== */
 
 /* ---------- Pagination ---------- */
@@ -349,7 +377,7 @@ returnButton.addEventListener("click", retourListe);
 
 
 /* =====================================================
-   11. INITIALISATION DE L'APPLICATION
+   12. INITIALISATION DE L'APPLICATION
 ===================================================== */
 
 /**
