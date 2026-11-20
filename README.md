@@ -13,7 +13,7 @@ Une mini carte permet de localiser visuellement la zone, l'adresse géographique
 4. Les filtres par quartier de Nantes s'appliquent avec les 3 boutons de navigation situés en haut de page
 5. Une barre de recherche par nombre de places est disponible juste dessous
 6. des boutons de pagination aparaissent en bas d'écran selon le nombre de résultats affichés (12 maximum par page)
-7. Naviguer au clavier est tout à fait possible 
+7. Navigation au clavier possible (accessibilité)
 
 ## Cartographie et données géographiques
 
@@ -21,6 +21,7 @@ Les coordonnées GPS ont été croisées avec OpenStreetMap, afin d'intégrer le
 
 ## Pistes d'amélioration
 
-- retour à tous les résultats une fois qu'un tri par quartier a été appliqué sans avoir à rafraîchir la page
+- retour à tous les résultats sans avoir à rafraîchir la page (tri par quartiers)
 - le bouton de fitre actif reste visuellement orange
 - une fonction de recherche par adresse geographique
+- skip de carte en carte sur la page de résultats sans passer par les liens OpenStreetMap
