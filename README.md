@@ -1,9 +1,9 @@
 # README : Adataviz
 
 Adataviz est une application web qui récupère un jeu de données réel depuis une API publique et l'affiche sous forme de cartes.
-Les données présentées sont les zones de stationnement dédiées aux motos et 2 roues motorisés situées dans l'hypercentre de Nantes.
-Elles sont exploitables et des filtres sont applicables par quartiers de l'hypercentre, par nombre de place souhaité sur la zone.
-Une mini carte permet de localiser visuellement la zone, l'adresse géographique et les coordonnées GPS sont également mises en avant.
+Les données exploitées sont les zones de stationnement dédiées aux motos et 2 roues motorisés, situées dans l'hypercentre de Nantes.
+Des filtres sont applicables par quartiers, et une recherche est possible avec pour critère le nombre de place.
+Une mini carte permet de localiser visuellement la zone, l'adresse géographique et les coordonnées GPS sont également présentées.
 
 ## Installation et utilisation 
 
@@ -17,7 +17,7 @@ Une mini carte permet de localiser visuellement la zone, l'adresse géographique
 
 ## Cartographie et données géographiques
 
-Les coordonnées GPS ont été croisées avec OpenStreetMap afin d'intégrer les mini-cartes avec une localisation exacte et de retourner l'adresse géographique pour chaque zone de stationnement par geocodage inverse.
+Les coordonnées GPS ont été croisées avec OpenStreetMap, afin d'intégrer les mini-cartes avec une localisation exacte et de retourner l'adresse géographique pour chaque zone de stationnement.
 
 ## Pistes d'amélioration
 
