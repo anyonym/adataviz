@@ -7,19 +7,12 @@
  * Supprime les accents et les espaces inutiles.
  * Convertit les caractères en minuscules.
  */
-export function normalizeText(text) {
+export function filtrerParQuartier(text) {
     return String(text ?? "")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
         .trim();
-}
-
-/**
- * Normalise le nom d'un quartier.
- */
-export function filtrerParQuartier(text) {
-    return normalizeText(text);
 }
 
 
@@ -34,17 +27,20 @@ export function filtrerParQuartier(text) {
  * Exemple : "12" correspond à 12, 120 ou 125.
  */
 export function filtrerNbPlaces(donnees, nbPlaces) {
-    const recherche = normalizeText(nbPlaces);
+    const recherche = filtrerParQuartier(nbPlaces);
+
     // Si aucune recherche n'est saisie,
     // on retourne toutes les données.
     if (!recherche) {
         return donnees;
     }
+
     return donnees.filter(stationnement => {
         const nombrePlaces = String(
             stationnement.nombre_place ?? ""
         );
-        return normalizeText(nombrePlaces).includes(recherche);
+
+        return filtrerParQuartier(nombrePlaces).includes(recherche);
     });
 }
 
@@ -59,6 +55,7 @@ export function filtrerNbPlaces(donnees, nbPlaces) {
 export function getCoordinates(stationnement) {
     const latitude = Number(stationnement.geo_point_2d?.lat);
     const longitude = Number(stationnement.geo_point_2d?.lon);
+
     // Vérification de la validité des coordonnées
     if (
         !Number.isFinite(latitude) ||
@@ -70,6 +67,7 @@ export function getCoordinates(stationnement) {
     ) {
         return null;
     }
+
     return {
         latitude,
         longitude
@@ -93,6 +91,7 @@ export function creerMiniCarte(stationnement, nomClasse = "mini-carte") {
     if (!coordinates) {
         return null;
     }
+
     const latitude = coordinates.latitude;
     const longitude = coordinates.longitude;
 
@@ -128,6 +127,7 @@ export function creerMiniCarte(stationnement, nomClasse = "mini-carte") {
 
     iframe.loading = "lazy";
     iframe.setAttribute("allowfullscreen", "");
+
     // Retour de la carte HTML
     return iframe;
 }
@@ -148,14 +148,18 @@ function attendreLimiteNominatim() {
     const requete = fileRequetes.then(async function() {
         const maintenant = Date.now();
         const delai = 1000 - (maintenant - derniereRequete);
+
         if (delai > 0) {
             await new Promise(function(resolve) {
                 setTimeout(resolve, delai);
             });
         }
+
         derniereRequete = Date.now();
     });
+
     fileRequetes = requete.catch(function() {});
+
     return requete;
 }
 
@@ -173,20 +177,24 @@ const adressesEnCache = new Map();
 export async function getAddress(stationnement) {
     // Récupération des coordonnées GPS
     const coordinates = getCoordinates(stationnement);
+
     // Vérification des coordonnées
     if (!coordinates) {
         return "Coordonnées GPS indisponibles";
     }
+
     const latitude = coordinates.latitude;
     const longitude = coordinates.longitude;
+
     // Création d'une clé pour retrouver une adresse en cache
     const cle = `${latitude},${longitude}`;
+
     // Vérification si l'adresse existe déjà
     if (adressesEnCache.has(cle)) {
         return adressesEnCache.get(cle);
     }
-    try {
 
+    try {
         // Préparation des paramètres de recherche
         const parametres = new URLSearchParams({
             lat: latitude,
@@ -196,24 +204,31 @@ export async function getAddress(stationnement) {
             zoom: "18",
             "accept-language": "fr"
         });
-        
+
         await attendreLimiteNominatim();
-        
+
         // Construction de l'URL
         const url = `https://nominatim.openstreetmap.org/reverse?${parametres}`;
+
         // Envoi de la requête à Nominatim
         const reponse = await fetch(url);
+
         // Vérification de la réponse
         if (!reponse.ok) {
             throw new Error("Erreur lors de la recherche de l'adresse");
         }
+
         // Conversion de la réponse en objet JavaScript
         const donnees = await reponse.json();
+
         // Récupération de l'adresse complète
         const adresse = donnees.display_name ?? "Adresse introuvable";
+
         // Enregistrement de l'adresse dans le cache
         adressesEnCache.set(cle, adresse);
+
         return adresse;
+
     } catch (err) {
         console.error("Erreur de géocodage :", err.message);
         return "Adresse indisponible";
@@ -284,6 +299,7 @@ export function formaterDonnees(stationnement) {
         "aria-label",
         `Voir le détail du stationnement ${stationnement.quartier ?? ""}`
     );
+
     // Retour de la carte HTML
     return article;
 }
