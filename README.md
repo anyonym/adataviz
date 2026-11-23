@@ -25,3 +25,4 @@ Les coordonnées GPS ont été croisées avec OpenStreetMap, afin d'intégrer le
 - le bouton de fitre actif reste visuellement orange
 - une fonction de recherche par adresse geographique
 - skip de carte en carte sur la page de résultats sans passer par les liens OpenStreetMap
+- lien des coordonnées GPS pour ouverture sur application de navigation
