@@ -11,12 +11,12 @@ Une mini carte permet de localiser visuellement la zone, l'adresse géographique
 
 1. Les filtres par quartier de Nantes s'appliquent avec les 3 boutons de navigation situés en haut de page
 2. Une barre de recherche par nombre de places est disponible juste dessous
-3. des boutons de pagination aparaissent en bas d'écran selon le nombre de résultats affichés (12 maximum par page)
+3. Des boutons de pagination apparaissent en bas d'écran selon le nombre de résultats affichés (12 maximum par page)
 4. Accessibilité : navigation au clavier prise en charge
 
 ## Cartographie et données géographiques
 
-Les coordonnées GPS ont été croisées avec OpenStreetMap, afin d'intégrer les mini-cartes avec une localisation exacte et de retourner l'adresse géographique pour chaque zone de stationnement.
+Les coordonnées GPS ont été croisées avec OpenStreetMap afin d'intégrer les mini-cartes avec une localisation exacte, et de retourner l'adresse géographique pour chaque zone de stationnement.
 
 ## Pistes d'amélioration
 
