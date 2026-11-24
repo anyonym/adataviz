@@ -1,5 +1,28 @@
 /* =====================================================
-   1. NORMALISATION DES TEXTES
+   1. RÉCUPÉRATION DES DONNÉES
+===================================================== */
+
+export async function chargerDonnees(url) {
+    try {
+        const reponse = await fetch(url);
+        // Vérification de la réponse de l'API
+        if (!reponse.ok) {
+            throw new Error("Erreur HTTP " + reponse.status);
+        }
+        const donnees = await reponse.json();
+        console.log(
+            donnees.total_count + " enregistrements au total"
+        );
+        return donnees.results ?? [];
+    } catch (err) {
+        console.error("Erreur de chargement :", err.message);
+        return [];
+    }
+}
+
+
+/* =====================================================
+   2. NORMALISATION DES TEXTES
 ===================================================== */
 
 /**
@@ -17,24 +40,21 @@ export function filtrerParQuartier(text) {
 
 
 /* =====================================================
-   2. FILTRAGE PAR NOMBRE DE PLACES
+   3. FILTRAGE PAR NOMBRE DE PLACES
 ===================================================== */
 
 /**
  * Filtre les stationnements selon le nombre de places.
- *
  * La recherche accepte une correspondance partielle.
  * Exemple : "12" correspond à 12, 120 ou 125.
  */
 export function filtrerNbPlaces(donnees, nbPlaces) {
     const recherche = filtrerParQuartier(nbPlaces);
-
     // Si aucune recherche n'est saisie,
     // on retourne toutes les données.
     if (!recherche) {
         return donnees;
     }
-
     return donnees.filter(stationnement => {
         const nombrePlaces = String(
             stationnement.nombre_place ?? ""
@@ -46,7 +66,7 @@ export function filtrerNbPlaces(donnees, nbPlaces) {
 
 
 /* =====================================================
-   3. RÉCUPÉRATION DES COORDONNÉES GPS
+   5. RÉCUPÉRATION DES COORDONNÉES GPS
 ===================================================== */
 
 /**
@@ -67,7 +87,6 @@ export function getCoordinates(stationnement) {
     ) {
         return null;
     }
-
     return {
         latitude,
         longitude
@@ -76,7 +95,7 @@ export function getCoordinates(stationnement) {
 
 
 /* =====================================================
-   4. CRÉATION DES MINI-CARTES OPENSTREETMAP
+   6. CRÉATION DES MINI-CARTES OPENSTREETMAP
 ===================================================== */
 
 /**
@@ -134,7 +153,7 @@ export function creerMiniCarte(stationnement, nomClasse = "mini-carte") {
 
 
 /* =====================================================
-   5. LIMITATION DES REQUÊTES NOMINATIM
+   7. LIMITATION DES REQUÊTES NOMINATIM
 ===================================================== */
 
 let derniereRequete = 0;
@@ -144,7 +163,7 @@ let fileRequetes = Promise.resolve();
  * Attend que la requête précédente soit terminée
  * et respecte un intervalle d'une seconde.
  */
-function attendreLimiteNominatim() {
+export function attendreLimiteNominatim() {
     const requete = fileRequetes.then(async function() {
         const maintenant = Date.now();
         const delai = 1000 - (maintenant - derniereRequete);
@@ -154,18 +173,15 @@ function attendreLimiteNominatim() {
                 setTimeout(resolve, delai);
             });
         }
-
         derniereRequete = Date.now();
     });
-
     fileRequetes = requete.catch(function() {});
-
     return requete;
 }
 
 
 /* =====================================================
-   6. GÉOCODAGE INVERSE : GPS VERS ADRESSE
+   8. GÉOCODAGE INVERSE : GPS VERS ADRESSE
 ===================================================== */
 
 // Stockage des adresses déjà récupérées
@@ -233,73 +249,4 @@ export async function getAddress(stationnement) {
         console.error("Erreur de géocodage :", err.message);
         return "Adresse indisponible";
     }
-}
-
-
-/* =====================================================
-   7. CRÉATION DES CARTES DE RÉSULTATS
-===================================================== */
-
-/**
- * Crée une carte HTML pour un stationnement.
- *
- * Elle contient :
- * - La commune
- * - Le quartier
- * - Le nombre de places
- * - Une mini-carte OpenStreetMap
- */
-export function formaterDonnees(stationnement) {
-
-    // Création de la carte principale
-    const article = document.createElement("article");
-    article.classList.add("carte");
-
-    // Création du titre
-    const titre = document.createElement("h3");
-    titre.textContent =
-        stationnement.commune ?? "Commune inconnue";
-
-    // Création de la liste des informations
-    const listeInformations = document.createElement("ul");
-
-    // Création du quartier
-    const quartier = document.createElement("li");
-    quartier.classList.add("quartier");
-    quartier.textContent =
-        stationnement.quartier ?? "Non renseigné";
-
-    // Création du nombre de places
-    const nbPlaces = document.createElement("li");
-    nbPlaces.classList.add("nbPlaces");
-    nbPlaces.textContent =
-        `${stationnement.nombre_place} places`;
-
-    // Ajout des informations dans la liste
-    listeInformations.append(quartier, nbPlaces);
-
-    // Création de la mini-carte
-    const miniCarte = creerMiniCarte(stationnement);
-
-    // Assemblage de la carte
-    article.append(
-        titre,
-        listeInformations
-    );
-
-    // Ajout de la mini-carte si les coordonnées existent
-    if (miniCarte) {
-        article.appendChild(miniCarte);
-    }
-
-    // Accessibilité de la carte au clavier
-    article.tabIndex = 0;
-    article.setAttribute("role", "button");
-    article.setAttribute(
-        "aria-label",
-        `Voir le détail du stationnement ${stationnement.quartier ?? ""}`
-    );
-
-    // Retour de la carte HTML
-    return article;
 }

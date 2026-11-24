@@ -1,4 +1,4 @@
-import { filtrerParQuartier, filtrerNbPlaces, formaterDonnees } from "./utils.js";
+import { filtrerParQuartier, filtrerNbPlaces } from "./utils.js";
 
 
 /* =====================================================
@@ -40,13 +40,3 @@ describe("filtrerNbPlaces()", () => {
         expect(filtrerNbPlaces(stationnements, "7")).toEqual([]);
     });
 });
-
-
-/* =====================================================
-   3. TESTS DE formaterDonnees()
-===================================================== */
-
-// Aucun test unitaire n'a fonctionné avec Jest pour la fonction formaterDonnees()
-// En effet, après en avoir recherché la raison, cette fonction manipule le DOM pour générer les cartes de résultats avec createElements et désormais elle récupère des éléments depuis internet pour créer les mini cartes insérées en bonus. 
-// Jest ne permet pas de tester les fonctions qui manipulent des données depuis internet ni des objets du DOM.
-// Néanmoins le projet, et les bonus, fonctionnent bien avec cette configuration du programme.
