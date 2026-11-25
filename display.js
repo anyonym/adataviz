@@ -1,171 +1,269 @@
-import { creerMiniCarte, getAddress, getCoordinates } from "./utils.js"
-import { filtrerStationnements, filteredStationnements, currentPage } from "./main.js";
+import { getCoordinates } from "./utils.js";
 
 
 /* =====================================================
-1. RÉCUPÉRATION DES ÉLÉMENTS HTML
+   1. RÉCUPÉRATION DES ÉLÉMENTS HTML
 ===================================================== */
 
-// Nombre de cartes affichées par page
-const resultatsParPage = 12;
-// Zone contenant les cartes
+// Zone contenant les cartes de résultats.
 const resultsContainer = document.querySelector(".results");
-// Compteur de résultats
+
+// Compteur de résultats.
 const totalResults = document.querySelector("#total-results p");
-// Champ de recherche
-const searchPlacesInput = document.querySelector("#recherche-places");
-// Section de la fiche détaillée
+
+// Section de la fiche détaillée.
 const focusSection = document.querySelector(".focus");
-// Carte de la fiche détaillée
+
+// Carte de la fiche détaillée.
 const focusCard = document.querySelector(".focus .carte");
-// Navigation
+
+// Navigation et pagination.
 const nav = document.querySelector("#nav");
 const pages = document.querySelector("#pages");
-// Boutons de pagination
+
+// Boutons de pagination.
 const previousButton = document.querySelector("#btn-precedente");
 const nextButton = document.querySelector("#btn-suivante");
-// Bouton de retour
+
+// Bouton de retour à la liste.
 const returnButton = document.querySelector("#btn-retour");
-// Boutons de filtrage par quartier
-const filtre = {
-    centre: document.querySelector("#centre"),
-    hpsf: document.querySelector("#hpsf"),
-    ile: document.querySelector("#ile")
-};
+
+// Conteneur de la mini-carte de la fiche détaillée.
 const miniCarteContainer = focusCard.querySelector(
     ".conteneur-mini-carte-focus"
 );
 
-// Identifiant de la dernière fiche sélectionnée
+// Identifiant de la dernière fiche sélectionnée.
+// Permet d'éviter les problèmes liés aux requêtes asynchrones.
 let numeroSelection = 0;
 
 
 /* =====================================================
-   2. CRÉATION DES CARTES DE RÉSULTATS
+   2. CRÉATION DES MINI-CARTES OPENSTREETMAP
+===================================================== */
+
+/**
+ * Crée une mini-carte OpenStreetMap.
+ *
+ * @param {Object} stationnement
+ * @param {string} nomClasse
+ * @returns {HTMLIFrameElement|null}
+ */
+function creerMiniCarte(
+    stationnement,
+    nomClasse = "mini-carte"
+) {
+    const coordinates = getCoordinates(stationnement);
+
+    // Pas de carte si les coordonnées sont invalides.
+    if (!coordinates) {
+        return null;
+    }
+
+    const { latitude, longitude } = coordinates;
+
+    // Définition de la zone affichée.
+    const ecartLatitude = 0.0015;
+
+    const ecartLongitude =
+        ecartLatitude *
+        (16 / 9) *
+        Math.cos(latitude * Math.PI / 180);
+
+    // Calcul des limites de la carte.
+    const ouest = longitude - ecartLongitude;
+    const est = longitude + ecartLongitude;
+    const sud = latitude - ecartLatitude;
+    const nord = latitude + ecartLatitude;
+
+    const parametres = new URLSearchParams({
+        bbox: `${ouest},${sud},${est},${nord}`,
+        layer: "mapnik",
+        marker: `${latitude},${longitude}`
+    });
+
+    const iframe = document.createElement("iframe");
+
+    iframe.src =
+        `https://www.openstreetmap.org/export/embed.html?${parametres}`;
+
+    iframe.classList.add(nomClasse);
+
+    iframe.title =
+        `Localisation du stationnement dans le quartier ${stationnement.quartier ?? ""}`;
+
+    iframe.loading = "lazy";
+    iframe.setAttribute("allowfullscreen", "");
+
+    return iframe;
+}
+
+
+/* =====================================================
+   3. CRÉATION DES CARTES DE RÉSULTATS
 ===================================================== */
 
 /**
  * Crée une carte HTML pour un stationnement.
- * Elle contient :
- * - La commune
- * - Le quartier
- * - Le nombre de places
- * - Une mini-carte OpenStreetMap
+ *
+ * @param {Object} stationnement
+ * @returns {HTMLElement}
  */
-export function formaterDonnees(stationnement) {
-
-    // Création de la carte principale
+function formaterDonnees(stationnement) {
     const article = document.createElement("article");
     article.classList.add("carte");
-    // Création du titre
+
+    // Titre de la carte.
     const titre = document.createElement("h3");
     titre.textContent =
         stationnement.commune ?? "Commune inconnue";
-    // Création de la liste des informations
+
+    // Liste des informations.
     const listeInformations = document.createElement("ul");
-    // Création du quartier
+
+    // Quartier.
     const quartier = document.createElement("li");
     quartier.classList.add("quartier");
     quartier.textContent =
         stationnement.quartier ?? "Non renseigné";
-    // Création du nombre de places
+
+    // Nombre de places.
     const nbPlaces = document.createElement("li");
     nbPlaces.classList.add("nbPlaces");
     nbPlaces.textContent =
-        `${stationnement.nombre_place} places`;
-    // Ajout des informations dans la liste
+        `${stationnement.nombre_place ?? 0} places`;
+
     listeInformations.append(quartier, nbPlaces);
-    // Création de la mini-carte
+
+    // Mini-carte.
     const miniCarte = creerMiniCarte(stationnement);
-    // Assemblage de la carte
-    article.append(
-        titre,
-        listeInformations
-    );
-    // Ajout de la mini-carte si les coordonnées existent
+
+    // Assemblage de la carte.
+    article.append(titre, listeInformations);
+
     if (miniCarte) {
         article.appendChild(miniCarte);
     }
-    // Accessibilité de la carte au clavier
+
+    // Accessibilité au clavier.
     article.tabIndex = 0;
     article.setAttribute("role", "button");
+
     article.setAttribute(
         "aria-label",
         `Voir le détail du stationnement ${stationnement.quartier ?? ""}`
     );
-    // Retour de la carte HTML
+
     return article;
 }
 
+
 /* =====================================================
-   3. AFFICHAGE DES RÉSULTATS
+   4. AFFICHAGE DES RÉSULTATS
 ===================================================== */
 
 /**
  * Affiche les stationnements de la page actuelle.
+ *
+ * @param {Array} stationnements - Données filtrées.
+ * @param {number} pageActuelle - Page à afficher.
+ * @param {number} resultatsParPage - Nombre de cartes par page.
+ * @param {Function} onSelect - Fonction appelée à la sélection.
  */
-export function displayResults() {
-    // Suppression des anciennes cartes
+export function displayResults(
+    stationnements,
+    pageActuelle,
+    resultatsParPage,
+    onSelect
+) {
+    // Suppression des anciennes cartes.
     resultsContainer.replaceChildren();
-    // Vérification de l'absence de résultats
-    if (filteredStationnements.length === 0) {
+
+    // Mise à jour du compteur.
+    updateCounter(stationnements.length);
+
+    // Calcul du nombre de pages.
+    const totalPages = Math.ceil(
+        stationnements.length / resultatsParPage
+    );
+
+    updatePagination(pageActuelle, totalPages);
+
+    // Aucun résultat.
+    if (stationnements.length === 0) {
         resultsContainer.textContent =
             "Aucune zone de stationnement ne correspond.";
-        updateCounter(0);
-        updatePagination();
         return;
     }
 
-    // Calcul de la position du premier résultat
-    const startIndex = (currentPage - 1) * resultatsParPage;
-    // Calcul de la position du dernier résultat
+    // Calcul des indices de début et de fin.
+    const startIndex =
+        (pageActuelle - 1) * resultatsParPage;
+
     const endIndex = startIndex + resultatsParPage;
-    // Récupération des résultats de la page actuelle
-    const pageResults = filteredStationnements.slice(
+
+    const pageResults = stationnements.slice(
         startIndex,
         endIndex
     );
 
-    // Création et affichage des cartes
+    // Création et affichage des cartes.
     pageResults.forEach(stationnement => {
-        // Création de la carte HTML
         const carte = formaterDonnees(stationnement);
-        // Ouverture de la fiche détaillée au clic
+
+        // Sélection au clic.
         carte.addEventListener("click", function() {
-            displayFocus(stationnement);
+            onSelect(stationnement, getAddressForDisplay);
         });
-        // Ouverture de la fiche détaillée au clavier
+
+        // Sélection au clavier.
         carte.addEventListener("keydown", function(event) {
-            if (event.key === "Enter" || event.key === " ") {
+            if (
+                event.key === "Enter" ||
+                event.key === " "
+            ) {
                 event.preventDefault();
-                displayFocus(stationnement);
+                onSelect(stationnement, getAddressForDisplay);
             }
         });
-        // Ajout de la carte dans la page
+
         resultsContainer.appendChild(carte);
     });
-    // Mise à jour du compteur
-    updateCounter(filteredStationnements.length);
-    // Mise à jour de la pagination
-    updatePagination();
 }
 
 
 /* =====================================================
-   4. AFFICHAGE DE LA FICHE DÉTAILLÉE
+   5. FICHE DÉTAILLÉE
 ===================================================== */
 
 /**
- * Affiche les informations détaillées d'un stationnement.
- * Recherche également son adresse à partir des coordonnées GPS.
+ * Fonction intermédiaire permettant de transmettre
+ * le service de géocodage depuis main.js.
+ *
+ * Elle est remplacée par le service fourni lors
+ * de l'appel à displayFocus.
  */
-async function displayFocus(stationnement) {
-    // Identification de la sélection actuelle
+let getAddressForDisplay = async function() {
+    return "Adresse indisponible";
+};
+
+/**
+ * Affiche la fiche détaillée d'un stationnement.
+ *
+ * @param {Object} stationnement
+ * @param {Function} getAddress - Fonction de géocodage.
+ */
+export async function displayFocus(
+    stationnement,
+    getAddress
+) {
     numeroSelection++;
 
     const selectionActuelle = numeroSelection;
 
-    // Récupération des éléments HTML
+    // Mise à jour de la fonction de géocodage.
+    getAddressForDisplay = getAddress;
+
     const titre = focusCard.querySelector("h3");
     const quartier = focusCard.querySelector(".quartier");
     const nbPlaces = focusCard.querySelector(".nbPlaces");
@@ -173,30 +271,36 @@ async function displayFocus(stationnement) {
     const longitudeElement = focusCard.querySelector(".lon");
     const adresseElement = focusCard.querySelector(".adresse");
 
-    // Mise à jour des informations du stationnement
+    // Informations du stationnement.
     titre.textContent =
         stationnement.commune ?? "Commune inconnue";
+
     quartier.textContent =
         stationnement.quartier ?? "Non renseigné";
+
     nbPlaces.textContent =
-        `${stationnement.nombre_place} places`;
-    // Récupération des coordonnées GPS
+        `${stationnement.nombre_place ?? 0} places`;
+
+    // Coordonnées GPS.
     const coordinates = getCoordinates(stationnement);
+
     latitudeElement.textContent =
         coordinates?.latitude ?? "Non renseigné";
+
     longitudeElement.textContent =
         coordinates?.longitude ?? "Non renseigné";
-    // Affichage d'un message pendant la recherche
+
+    // Message temporaire pendant le géocodage.
     adresseElement.textContent = "Recherche de l'adresse...";
-    // Création de la mini-carte
+
+    // Création de la mini-carte de la fiche.
     const miniCarte = creerMiniCarte(
         stationnement,
         "mini-carte-focus"
     );
 
-    // Suppression de l'ancienne carte
     miniCarteContainer.replaceChildren();
-    // Affichage de la nouvelle carte
+
     if (miniCarte) {
         miniCarteContainer.appendChild(miniCarte);
     } else {
@@ -204,47 +308,42 @@ async function displayFocus(stationnement) {
             "Carte indisponible : coordonnées GPS manquantes.";
     }
 
-    // Affichage de la fiche détaillée
+    // Affichage de la fiche.
     focusSection.classList.remove("cache");
     focusCard.classList.remove("cache");
 
-    // Masquage de la liste des résultats
+    // Masquage de la liste.
     nav.classList.add("cache");
     totalResults.parentElement.classList.add("cache");
     resultsContainer.classList.add("cache");
     pages.classList.add("cache");
 
-    // Recherche de l'adresse avec Nominatim
+    // Recherche de l'adresse.
     const adresse = await getAddress(stationnement);
 
-    // Vérification que la fiche sélectionnée est toujours la même
+    // Vérification que la fiche n'a pas changé entre-temps.
     if (selectionActuelle !== numeroSelection) {
         return;
     }
-    // Affichage de l'adresse
+
     adresseElement.textContent = adresse;
 }
 
 
 /* =====================================================
-   5. RETOUR À LA LISTE DES RÉSULTATS
+   6. RETOUR À LA LISTE
 ===================================================== */
 
 /**
- * Masque la fiche détaillée et réaffiche les résultats.
+ * Masque la fiche détaillée et réaffiche la liste.
  */
-function retourListe() {
-    // Annulation logique d'une ancienne recherche d'adresse
-    // La requête Nominatim peut encore être en cours.
-    // L'incrémentation de numeroSelection permet d'empêcher
-    // son résultat de modifier une fiche qui n'est plus sélectionnée.
+export function retourListe() {
+    // Invalide les anciennes recherches d'adresse.
     numeroSelection++;
 
-    // Masquage de la fiche détaillée
     focusSection.classList.add("cache");
     focusCard.classList.add("cache");
 
-    // Réaffichage de la navigation
     nav.classList.remove("cache");
     totalResults.parentElement.classList.remove("cache");
     resultsContainer.classList.remove("cache");
@@ -253,11 +352,13 @@ function retourListe() {
 
 
 /* =====================================================
-   6. MISE À JOUR DU COMPTEUR
+   7. COMPTEUR DE RÉSULTATS
 ===================================================== */
 
 /**
- * Affiche le nombre total de résultats.
+ * Affiche le nombre de résultats trouvés.
+ *
+ * @param {number} nombre
  */
 function updateCounter(nombre) {
     totalResults.textContent =
@@ -266,80 +367,23 @@ function updateCounter(nombre) {
 
 
 /* =====================================================
-   7. GESTION DE LA PAGINATION
+   8. PAGINATION VISUELLE
 ===================================================== */
 
 /**
- * Calcule le nombre de pages disponibles.
- * Affiche ou masque les boutons de navigation.
+ * Met à jour l'affichage des boutons de pagination.
+ *
+ * @param {number} pageActuelle
+ * @param {number} totalPages
  */
-function updatePagination() {
-    const totalPages = Math.ceil(
-        filteredStationnements.length / resultatsParPage
-    );
-    // Bouton précédent
+function updatePagination(pageActuelle, totalPages) {
     previousButton.classList.toggle(
         "cache",
-        currentPage <= 1
+        pageActuelle <= 1
     );
-    // Bouton suivant
+
     nextButton.classList.toggle(
         "cache",
-        currentPage >= totalPages
+        pageActuelle >= totalPages
     );
 }
-
-
-/* =====================================================
-   8. GESTION DES ÉVÉNEMENTS
-===================================================== */
-
-/* ---------- Pagination ---------- */
-
-// Page précédente
-previousButton.addEventListener("click", function() {
-    if (currentPage > 1) {
-        currentPage--;
-        displayResults();
-    }
-});
-
-// Page suivante
-nextButton.addEventListener("click", function() {
-    const totalPages = Math.ceil(
-        filteredStationnements.length / resultatsParPage
-    );
-    if (currentPage < totalPages) {
-        currentPage++;
-        displayResults();
-    }
-});
-
-/* ---------- Filtrage par quartier ---------- */
-
-// Centre-ville
-filtre.centre.addEventListener("click", function() {
-    currentFilter = "centre";
-    filtrerStationnements();
-});
-// Hauts-Pavés - Saint-Félix
-filtre.hpsf.addEventListener("click", function() {
-    currentFilter = "hpsf";
-    filtrerStationnements();
-});
-// Île de Nantes
-filtre.ile.addEventListener("click", function() {
-    currentFilter = "ile";
-    filtrerStationnements();
-});
-
-/* ---------- Recherche par nombre de places ---------- */
-
-searchPlacesInput.addEventListener("input", function(event) {
-    currentNbPlaces = event.target.value.trim();
-    filtrerStationnements();
-});
-
-/* ---------- Bouton retour ---------- */
-
-returnButton.addEventListener("click", retourListe);
